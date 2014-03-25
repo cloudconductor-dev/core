@@ -1,0 +1,727 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2014 TIS Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:cc="http://cloudconductor.org/namespaces/cc"
+  targetNamespace="http://cloudconductor.org/namespaces/cc"
+  elementFormDefault="qualified">
+  <xs:element name="System">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+        <xs:element name="Description" type="xs:string"/>
+        <xs:element name="Author" type="xs:string"/>
+        <xs:element name="Date" type="xs:date"/>
+        <xs:element name="License" type="xs:string"/>
+        <xs:element name="Infrastructures" type="cc:InfrastructuresType"/>
+        <xs:element name="Machines" type="cc:MachinesType"/>
+        <xs:element name="MachineGroups" type="cc:MachineGroupsType"/>
+        <xs:element name="Middlewares" type="cc:MiddlewaresType"/>
+        <xs:element name="Roles" type="cc:RolesType"/>
+        <xs:element name="Volumes" type="cc:VolumesType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="MachineFilters" type="cc:MachineFiltersType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Networks" type="cc:NetworksType"/>
+        <xs:element name="NetworkGroups" type="cc:NetworkGroupsType"/>
+        <xs:element name="Routes" type="cc:RoutesType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="NetworkFilters" type="cc:NetworkFiltersType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="NATs" type="cc:NATsType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="FloatingIPs" type="cc:FloatingIPsType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Monitorings" type="cc:MonitoringsType" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:key name="InfrastructureId">
+      <xs:selector xpath="cc:Infrastructures/cc:Infrastructure"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="MachineId">
+      <xs:selector xpath="cc:Machines/cc:Machine"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="MachineGroupId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="MiddlewareId">
+      <xs:selector xpath="cc:Middlewares/cc:Middleware"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="RoleId">
+      <xs:selector xpath="cc:Roles/cc:Role"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="VolumeId">
+      <xs:selector xpath="cc:Volumes/cc:Volume"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="MachineFilterId">
+      <xs:selector xpath="cc:MachineFilters/cc:MachineFilter"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="NetworkId">
+      <xs:selector xpath="cc:Networks/cc:Network"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="NetworkGroupId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="RouteId">
+      <xs:selector xpath="cc:Routes/cc:Route"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="NetworkFilterId">
+      <xs:selector xpath="cc:NetworkFilters/cc:NetworkFilter"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="NATId">
+      <xs:selector xpath="cc:NATs/cc:NAT"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="FloatingIPId">
+      <xs:selector xpath="cc:FloatingIPs/cc:FloatingIP"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:key name="MonitoringId">
+      <xs:selector xpath="cc:Monitorings/cc:Monitoring"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:keyref name="Machine-NetworkInterfaceRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:Machines/cc:Machine/cc:NetworkInterfaces/cc:NetworkInterface"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="Machine-VolumeRef" refer="cc:VolumeId">
+      <xs:selector xpath="cc:Machines/cc:Machine/cc:Volumes/cc:Volume"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="Machine-MachineFilterRef" refer="cc:MachineFilterId">
+      <xs:selector xpath="cc:Machines/cc:Machine/cc:MachineFilters/cc:MachineFilter"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineGroup-MachineRef" refer="cc:MachineId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineGroup-InfrastructureRef" refer="cc:InfrastructureId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup/cc:Infrastructures/cc:Infrastructure"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineGroup-RoleRef" refer="cc:RoleId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup/cc:Roles/cc:Role"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineGroup-FloatingIPRef" refer="cc:FloatingIPId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup/cc:FloatingIP"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineGroups-MonitoringRef" refer="cc:MonitoringId">
+      <xs:selector xpath="cc:MachineGroups/cc:MachineGroup/cc:Monitorings/cc:Monitoring"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="Role-MiddlewareRef" refer="cc:MiddlewareId">
+      <xs:selector xpath="cc:Roles/cc:Role/cc:Middlewares/cc:Middleware"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineFilter-SourceRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:MachineFilters/cc:MachineFilter/cc:Source"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="MachineFilter-DestinationRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:MachineFilters/cc:MachineFilter/cc:Destination"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkGroup-NetworkRef" refer="cc:NetworkId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup/cc:Networks/cc:Network"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkGroup-InfrastructureRef" refer="cc:InfrastructureId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup/cc:Networks/cc:Network/cc:Infrastructures/cc:Infrastructure"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkGroup-NetworkFilterRef" refer="cc:NetworkFilterId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup/cc:NetworkFilters/cc:NetworkFilter"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkGroup-RouteRef" refer="cc:RouteId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup/cc:Routes/cc:Route"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkGroup-NATRef" refer="cc:NATId">
+      <xs:selector xpath="cc:NetworkGroups/cc:NetworkGroup/cc:NATs/cc:NAT"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="Route-DestinationRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:Routes/cc:Route/cc:Destination"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="Route-TargetRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:Routes/cc:Route/cc:Target"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkFilter-SourceRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:NetworkFilters/cc:NetworkFilter/cc:Source"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NetworkFilter-DestinationRef" refer="cc:NetworkGroupId">
+      <xs:selector xpath="cc:NetworkFilters/cc:NetworkFilter/cc:Destination"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NAT-SourceRef" refer="cc:MachineGroupId">
+      <xs:selector xpath="cc:NATs/cc:NAT/cc:Source"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+    <xs:keyref name="NAT-DestinationRef" refer="cc:MachineGroupId">
+      <xs:selector xpath="cc:NATs/cc:NAT/cc:Destination"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+  </xs:element>
+
+  <xs:complexType name="InfrastructuresType">
+    <xs:sequence>
+      <xs:element name="Infrastructure" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MachinesType">
+    <xs:sequence>
+      <xs:element name="Machine" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="SpecType" type="cc:SpecTypeType"/>
+            <xs:element name="OSType" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="OSVersion" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="NetworkInterfaces">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="NetworkInterface" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Volumes" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Volume" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="MountPoint" type="cc:DenyWhiteSpaceOnlyType"/>
+                      </xs:sequence>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="MachineFilters">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="MachineFilter" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MachineGroupsType">
+    <xs:sequence>
+      <xs:element name="MachineGroup" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Infrastructures">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Infrastructure" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="Priority" minOccurs="0" maxOccurs="1" type="xs:positiveInteger"/>
+                      </xs:sequence>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Roles">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Role">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="Import" minOccurs="0" maxOccurs="unbounded" type="cc:ImportProvisioningSettingsType"/>
+                        <xs:element name="UserInputKeys" minOccurs="0" maxOccurs="1">
+                          <xs:complexType>
+                            <xs:sequence>
+                              <xs:element name="UserInputKey" type="cc:DenyWhiteSpaceOnlyType" minOccurs="1" maxOccurs="unbounded"/>
+                            </xs:sequence>
+                          </xs:complexType>
+                        </xs:element>
+                      </xs:sequence>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Volumes" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Volume" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="MountPoint" type="cc:DenyWhiteSpaceOnlyType"/>
+                      </xs:sequence>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="FloatingIP" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:attribute name="ref" use="required" type="cc:IdType"/>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="NodeType">
+              <xs:complexType>
+                <xs:choice>
+                  <xs:element name="Single">
+                    <xs:complexType/>
+                  </xs:element>
+                  <xs:element name="HA" type="cc:HAType"/>
+                  <xs:element name="Cluster" type="cc:ClusterType"/>
+                </xs:choice>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Monitorings" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Monitoring" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+          <xs:attribute name="ref" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="HAType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Active/Passive"/>
+      <xs:enumeration value="Active/Active"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ClusterType">
+    <xs:sequence>
+      <xs:element name="MinSize" type="xs:positiveInteger"/>
+      <xs:element name="MaxSize" type="xs:positiveInteger"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RolesType">
+    <xs:sequence>
+      <xs:element name="Role" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Middlewares">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Middleware" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="Import" type="cc:ImportProvisioningSettingsType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="UserInputKeys" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="UserInputKey" type="cc:DenyWhiteSpaceOnlyType" minOccurs="1" maxOccurs="unbounded"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+          <xs:attribute name="type" use="required" type="cc:ProvisioningType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ParametersType">
+    <xs:sequence>
+      <xs:element name="Parameter" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Key" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Value" type="cc:DenyWhiteSpaceOnlyType"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="VolumesType">
+    <xs:sequence>
+      <xs:element name="Volume" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Size" type="xs:positiveInteger"/>
+            <xs:element name="IOPS" type="cc:IOPSType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NetworksType">
+    <xs:sequence>
+      <xs:element name="Network" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NetworkGroupsType">
+    <xs:sequence>
+      <xs:element name="NetworkGroup" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Networks" type="cc:NetworkGroups-NetworksType"/>
+            <xs:element name="NetworkFilters" type="cc:NetworkGroups-NetworkFiltersType" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="Routes" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Route" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="NATs" minOccurs="0" maxOccurs="1">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="NAT" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NetworkGroups-NetworksType">
+    <xs:sequence>
+      <xs:element name="Network" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Infrastructures">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="Infrastructure" minOccurs="1" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:attribute name="ref" use="required" type="cc:IdType"/>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="ref" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NetworkGroups-NetworkFiltersType">
+    <xs:sequence>
+      <xs:element name="NetworkFilter" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="ref" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RoutesType">
+    <xs:sequence>
+      <xs:element name="Route" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Destination" type="cc:RemoteType"/>
+            <xs:element name="Target" type="cc:RemoteType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MiddlewaresType">
+    <xs:sequence>
+      <xs:element name="Middleware" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Repository" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="CookbookName" type="cc:DenyWhiteSpaceOnlyType" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
+          <xs:attribute name="type" use="required" type="cc:ProvisioningType"/>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MachineFiltersType">
+    <xs:sequence>
+      <xs:element name="MachineFilter" minOccurs="0" maxOccurs="unbounded" type="cc:FilterType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NetworkFiltersType">
+    <xs:sequence>
+      <xs:element name="NetworkFilter" minOccurs="0" maxOccurs="unbounded" type="cc:FilterType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FilterType">
+    <xs:sequence>
+      <xs:element name="Protocol" type="cc:ProtocolType"/>
+      <xs:element name="Port" type="cc:PortType"/>
+      <xs:element name="Direction" type="cc:DirectionType"/>
+      <xs:choice>
+        <xs:element name="Source" type="cc:RemoteType"/>
+        <xs:element name="Destination" type="cc:RemoteType"/>
+      </xs:choice>
+      <xs:element name="RuleAction" type="cc:RuleActionType"/>
+    </xs:sequence>
+    <xs:attribute name="id" use="required" type="cc:IdType"/>
+  </xs:complexType>
+
+  <xs:complexType name="RemoteType"><!-- FixMe <Source ref="private_net_g1">all</Source>のように書けてしまう-->
+    <xs:simpleContent>
+      <xs:extension base="cc:RoutingKeywordsType">
+        <xs:attribute name="ref" use="optional" type="cc:IdType"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="NATsType">
+    <xs:sequence>
+      <xs:element name="NAT" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Source" type="cc:RemoteType"/>
+            <xs:element name="Destination" type="cc:RemoteType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="FloatingIPsType">
+    <xs:sequence>
+      <xs:element name="FloatingIP" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="MonitoringsType">
+    <xs:sequence>
+      <xs:element name="Monitoring" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Name" type="cc:DenyWhiteSpaceOnlyType"/>
+            <xs:element name="Import" type="cc:ImportMonitoringSettingsType"/>
+          </xs:sequence>
+          <xs:attribute name="id" use="required" type="cc:IdType"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ImportProvisioningSettingsType">
+    <xs:simpleContent>
+      <xs:extension base="cc:DenyWhiteSpaceOnlyType">
+        <xs:attribute name="type" use="required" type="cc:ProvisioningSettingsType"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="ImportMonitoringSettingsType">
+    <xs:simpleContent>
+      <xs:extension base="cc:DenyWhiteSpaceOnlyType">
+        <xs:attribute name="filetype" use="required" type="cc:MonitoringSettingsType"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="SpecTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="large"/>
+      <xs:enumeration value="medium"/>
+      <xs:enumeration value="small"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IOPSType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="low"/>
+      <xs:enumeration value="high"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="AddrType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([\d|x]{1,3})\.([\d|x]{1,3})\.([\d|x]{1,3})\.([\d|x]{1,3})"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ProtocolType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="tcp"/>
+          <xs:enumeration value="udp"/>
+          <xs:enumeration value="icmp"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+
+  <xs:simpleType name="PortType">
+    <xs:union>
+      <xs:simpleType>
+        <xs:restriction base="xs:positiveInteger">
+          <xs:maxInclusive value="65535"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="all"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:union>
+  </xs:simpleType>
+
+  <xs:simpleType name="DirectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ingress"/>
+      <xs:enumeration value="egress"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+
+  <xs:simpleType name="RuleActionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="allow"/>
+      <xs:enumeration value="deny"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DenyWhiteSpaceOnlyType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value=".*[^\s　].*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IdType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[\w\d_-]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RoutingKeywordsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="all"/>
+      <xs:enumeration value="{{InternetGateway}}"/>
+      <xs:enumeration value=""/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ProvisioningSettingsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="chef_attribute"/>
+      <xs:enumeration value="chef_runlist"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="MonitoringSettingsType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="zabbix"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ProvisioningType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="chef"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

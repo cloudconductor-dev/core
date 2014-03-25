@@ -1,0 +1,162 @@
+#!/bin/sh
+# required variables
+# - hostname: machine hostname
+# - node_json: json_string contain chef attributes and run_list
+# - proxy: proxy informations
+#   - url
+#   - url_with_credential
+#   - username
+#   - password
+# - cookbooks: opscode-community cookbooks to install target machine
+# - middlewares: middlewares to install target machine (site-cookbooks)
+
+CHEF_PACKAGE_URL=https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64
+CHEF_CLIENT_RPM=chef-11.8.0-1.el6.x86_64.rpm
+
+WORK_DIR=/tmp
+RETRIES=5
+LOG_FILE=<%= ConductorConfig.cloudinit_log_file %>
+exec >> $LOG_FILE 2>&1
+
+function log() {
+  timestamp='date +"%Y-%m-%dT%H:%M:%S%z"'
+  level=$1
+  message=$2
+  echo "[`$timestamp`] $level: $message"
+}
+
+trap "echo 'ERROR: Received signal. exit process.'; exit 1" HUP INT QUIT ABRT BUS SEGV PIPE TERM
+cd $WORK_DIR
+
+log "INFO" "Start instance setup."
+
+# Set Proxy Environments
+<% if !proxy[:url].nil? && !proxy[:url].empty? %>
+  <% proxy_url = (!proxy[:username].blank? && !proxy[:password].blank?) ? "http://#{proxy[:username]}:#{proxy[:password]}@#{proxy[:url]}/" : "http://#{proxy[:url]}/" %>
+  <% no_proxy_string = proxy[:noproxy].blank? ? nil : "export no_proxy=#{proxy[:noproxy]}" %>
+  cat <<EOF >> /etc/profile.d/proxy.sh
+export http_proxy='<%= proxy_url %>'
+export https_proxy='<%= proxy_url %>'
+export ftp_proxy='<%= proxy_url %>'
+<%= no_proxy_string %>
+EOF
+  source /etc/profile.d/proxy.sh
+<% end %>
+
+# Update packages and install git
+for i in `seq 1 $RETRIES`
+do
+  yum -y update
+  yum -y groupinstall "Development Tools"
+  yum -y install git && break
+  if [ $i -ge $RETRIES ]; then
+    log "ERROR" "Failed to install yum packages."
+    exit 1
+  fi
+  sleep 5
+done
+
+# Install chef-solo
+rpm -q chef
+if [ $? -ne 0 ]; then
+  for i in `seq 1 $RETRIES`
+  do
+    curl --connect-timeout 10 --continue-at - -O $CHEF_PACKAGE_URL/$CHEF_CLIENT_RPM
+    if [ $? -eq 0 ]; then
+      rpm -ivh $CHEF_CLIENT_RPM
+      rm -f $CHEF_CLIENT_RPM
+      break
+    else
+      if [ $i -ge $RETRIES ]; then
+        log "ERROR" "Failed to download chef-solo rpm."
+        exit 1
+      else
+        log "WARN" "retrying $i"
+      fi
+    fi
+    sleep 5
+  done
+fi
+
+# Install berkshelf
+/opt/chef/embedded/bin/gem list berkshelf | tr -d '\n'|grep berkshelf >& /dev/null
+if [ $? -ne 0 ]; then
+  for i in `seq 1 $RETRIES`
+  do
+    /opt/chef/embedded/bin/gem install --no-ri --no-rdoc berkshelf && break
+
+    if [ $i -ge $RETRIES ]; then
+      log "ERROR" "Failed to install berkshelf."
+      exit 1
+    fi
+    sleep 5
+  done
+fi
+
+# Create chef-repo
+git clone https://github.com/opscode/chef-repo.git || { log "ERROR" "Failed to clone chef-repo repository."; exit 1; }
+
+# Create setup.json
+cat <<'EOF' > $WORK_DIR/chef-repo/config/setup.json
+<%= node_json %>
+EOF
+
+# Create solo.rb
+cat <<EOF > $WORK_DIR/chef-repo/config/solo.rb
+cookbook_path ['$WORK_DIR/chef-repo/cookbooks', '$WORK_DIR/chef-repo/site-cookbooks']
+role_path     '$WORK_DIR/chef-repo/roles'
+data_bag_path    '$WORK_DIR/chef-repo/data_bags'
+log_level :info
+<% if !proxy[:url].nil? && !proxy[:url].empty? %>
+http_proxy '<%= "http://#{proxy[:url]}/" %>'
+<% unless proxy[:username].nil? %>http_proxy_user '<%= proxy[:username] %>'<% end %>
+<% unless proxy[:password].nil? %>http_proxy_pass '<%= proxy[:password] %>'<% end %>
+https_proxy '<%= "http://#{proxy[:url]}/" %>'
+<% unless proxy[:username].nil? %>https_proxy_user '<%= proxy[:username] %>'<% end %>
+<% unless proxy[:password].nil? %>https_proxy_pass '<%= proxy[:password] %>'<% end %>
+<% end %>
+EOF
+
+
+# Download site-cookbooks
+mkdir -p $WORK_DIR/chef-repo/site-cookbooks
+<% middlewares.each do |m| %>
+  <% repository_name = m.repository.split('/').last.slice(/(.*)\.git$/, 1) %>
+  git clone --depth 1 <%= m.repository %> || { log "ERROR" "Failed to clone git repository '<%= m.repository %>'."; exit 1; }
+  <% if m.cookbook_name.blank? %>
+    <% cookbook_name = repository_name %>
+    mv <%= repository_name %> $WORK_DIR/chef-repo/site-cookbooks/
+  <% else %>
+    <% cookbook_name = m.cookbook_name %>
+    mv <%= repository_name + '/' + cookbook_name %> $WORK_DIR/chef-repo/site-cookbooks/
+    mv <%= repository_name %>  <%= cookbook_name + '-' + repository_name %>
+#    rm -rf <%= repository_name %>
+  <% end %>
+  cd $WORK_DIR/chef-repo/site-cookbooks/<%= cookbook_name %>
+  if [ ! -e ./Berksfile ]; then
+    cat <<EOF > ./Berksfile
+site :opscode
+metadata
+EOF
+  fi
+  /opt/chef/embedded/bin/berks --path=vender/chef-repo/cookbooks
+  cp -r vender/chef-repo/cookbooks/* $WORK_DIR/chef-repo/cookbooks/
+  cd $WORK_DIR
+<% end %>
+
+# Download cookbooks from opscode-community
+<% cookbooks.each do |cookbook| %>
+  if [ ! -d "$WORK_DIR/chef-repo/site-cookbooks/<%= cookbook %>" -a ! -d "$WORK_DIR/chef-repo/cookbooks/<%= cookbook %>" ]; then
+    knife cookbook site install <%= cookbook %> -c $WORK_DIR/chef-repo/config/solo.rb
+  fi
+<% end %>
+
+# Run chef-solo
+/opt/chef/bin/chef-solo -c $WORK_DIR/chef-repo/config/solo.rb -j $WORK_DIR/chef-repo/config/setup.json
+if [ $? -ne 0 ]; then
+  log "ERROR" "Failed to run chef-solo."
+  exit 1
+fi
+
+# Output complete log
+log "INFO" "Success to setup instance."

@@ -1,0 +1,18 @@
+# Ignore log files
+log/*.log
+
+# Ignore temporary files
+tmp/*
+Gemfile.lock
+db/schema.rb
+db/*.sqlite3
+
+# Ignore coverage files
+coverage/*
+
+# Ignore bundle files
+vendor/*
+.bundle/*
+
+# Ignore vi/vim swap files
+*.swp

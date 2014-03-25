@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2014 TIS Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<?xml version="1.0" encoding="UTF-8" ?>
+<cc:System xmlns:cc="http://cloudconductor.org/namespaces/cc">
+  <cc:Name>サンプルテンプレート</cc:Name>
+  <cc:Description>Single Web Server System with Zabbix Server</cc:Description>
+  <cc:Author>TIS Inc.</cc:Author>
+  <cc:Date>2013-12-27</cc:Date>
+  <cc:License>???</cc:License>
+
+  <!-- テンプレート内で利用するクラウドの定義 -->
+  <cc:Infrastructures>
+    <cc:Infrastructure id="cloud1">
+      <cc:Name>Cloud1</cc:Name>
+    </cc:Infrastructure>
+  </cc:Infrastructures>
+
+  <!-- マシン定義 -->
+  <cc:Machines>
+    <cc:Machine id="small-dns-server">
+      <cc:Name>Small DNS Server</cc:Name>
+      <cc:SpecType>small</cc:SpecType>
+      <cc:OSType>CentOS</cc:OSType>
+      <cc:OSVersion>6.5</cc:OSVersion>
+      <cc:NetworkInterfaces>
+        <cc:NetworkInterface ref="private_net_g1" />
+      </cc:NetworkInterfaces>
+      <cc:MachineFilters>
+        <cc:MachineFilter ref="sec_in_22" />
+        <cc:MachineFilter ref="sec_in_80" />
+        <cc:MachineFilter ref="sec_in_udp_53" />
+        <cc:MachineFilter ref="sec_in_10050" />
+        <cc:MachineFilter ref="sec_in_10051" />
+        <cc:MachineFilter ref="sec_in_all_deny" />
+        <cc:MachineFilter ref="sec_in_22_from_private" />
+        <cc:MachineFilter ref="sec_out_all_allow" />
+      </cc:MachineFilters>
+    </cc:Machine>
+    <cc:Machine id="small-server">
+      <cc:Name>Small Server</cc:Name>
+      <cc:SpecType>small</cc:SpecType>
+      <cc:OSType>CentOS</cc:OSType>
+      <cc:OSVersion>6.5</cc:OSVersion>
+      <cc:NetworkInterfaces>
+        <cc:NetworkInterface ref="private_net_g1" />
+      </cc:NetworkInterfaces>
+      <cc:MachineFilters>
+        <cc:MachineFilter ref="sec_in_80" />
+        <cc:MachineFilter ref="sec_in_10050" />
+        <cc:MachineFilter ref="sec_in_all_deny" />
+        <cc:MachineFilter ref="sec_in_22_from_private" />
+        <cc:MachineFilter ref="sec_out_all_allow" />
+      </cc:MachineFilters>
+    </cc:Machine>
+  </cc:Machines>
+
+  <!-- マシングループ定義 -->
+  <cc:MachineGroups>
+    <cc:MachineGroup id="web-server-g" ref="small-server">
+      <cc:Name>Apache Web Server</cc:Name>
+      <cc:Infrastructures>
+        <cc:Infrastructure ref="cloud1" />
+      </cc:Infrastructures>
+      <cc:Roles>
+        <cc:Role ref="web_role" />
+      </cc:Roles>
+      <cc:FloatingIP ref="eip1" />
+      <cc:NodeType>
+        <cc:Single />
+      </cc:NodeType>
+      <cc:Monitorings>
+        <cc:Monitoring ref="linux_os" />
+        <cc:Monitoring ref="conductor_web" />
+      </cc:Monitorings>
+    </cc:MachineGroup>
+
+    <cc:MachineGroup id="ap-server-g" ref="small-server">
+      <cc:Name>Tomcat Ap Server</cc:Name>
+      <cc:Infrastructures>
+        <cc:Infrastructure ref="cloud1" />
+      </cc:Infrastructures>
+      <cc:Roles>
+        <cc:Role ref="ap_role" />
+      </cc:Roles>
+      <cc:NodeType>
+        <cc:Single />
+      </cc:NodeType>
+      <cc:Monitorings>
+        <cc:Monitoring ref="linux_os" />
+        <cc:Monitoring ref="conductor_ap" />
+      </cc:Monitorings>
+    </cc:MachineGroup>
+
+    <cc:MachineGroup id="db-server-g" ref="small-server">
+      <cc:Name>PostgreSQL DB Server</cc:Name>
+      <cc:Infrastructures>
+        <cc:Infrastructure ref="cloud1" />
+      </cc:Infrastructures>
+      <cc:Roles>
+        <cc:Role ref="db_role" />
+      </cc:Roles>
+      <cc:NodeType>
+        <cc:Single />
+      </cc:NodeType>
+      <cc:Monitorings>
+        <cc:Monitoring ref="linux_os" />
+        <cc:Monitoring ref="conductor_db" />
+      </cc:Monitorings>
+    </cc:MachineGroup>
+
+    <cc:MachineGroup id="zabbix-server-g" ref="small-dns-server">
+      <cc:Name>Zabbix Server</cc:Name>
+      <cc:Infrastructures>
+        <cc:Infrastructure ref="cloud1" />
+      </cc:Infrastructures>
+      <cc:Roles>
+        <cc:Role ref="zabbix_dns_role" />
+      </cc:Roles>
+      <cc:FloatingIP ref="eip2" />
+      <cc:NodeType>
+        <cc:Single />
+      </cc:NodeType>
+      <cc:Monitorings>
+        <cc:Monitoring ref="linux_os" />
+      </cc:Monitorings>
+    </cc:MachineGroup>
+  </cc:MachineGroups>
+
+  <!-- Middleware定義 -->
+  <cc:Middlewares>
+    <cc:Middleware type="chef" id="zabbix_cookbook">
+      <cc:Name>CC-Zabbix</cc:Name>
+      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:CookbookName>cc-zabbix</cc:CookbookName>
+    </cc:Middleware>
+
+    <cc:Middleware type="chef" id="nsupdate_cookbook">
+      <cc:Name>CC-NSUpdate</cc:Name>
+      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:CookbookName>cc-nsupdate</cc:CookbookName>
+    </cc:Middleware>
+
+    <cc:Middleware type="chef" id="bind_cookbook">
+      <cc:Name>CC-Bind</cc:Name>
+      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:CookbookName>cc-bind</cc:CookbookName>
+    </cc:Middleware>
+
+    <cc:Middleware type="chef" id="deploy_cookbook">
+      <cc:Name>CC-Deploy</cc:Name>
+      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:CookbookName>cc-deploy</cc:CookbookName>
+    </cc:Middleware>
+
+    <cc:Middleware type="chef" id="application_java_cookbook">
+      <cc:Name>application_java</cc:Name>
+      <cc:Repository>https://github.com/cloudconductor-dev/application_java.git</cc:Repository>
+    </cc:Middleware>
+  </cc:Middlewares>
+
+  <!-- Role定義 -->
+  <cc:Roles>
+    <cc:Role type="chef" id="web_role">
+      <cc:Name>Web Server Role</cc:Name>
+      <cc:Middlewares>
+        <cc:Middleware ref="nsupdate_cookbook" />
+        <cc:Middleware ref="zabbix_cookbook" />
+        <cc:Middleware ref="deploy_cookbook" />
+      </cc:Middlewares>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_apache.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_apache.json</cc:Import>
+    </cc:Role>
+
+    <cc:Role type="chef" id="ap_role">
+      <cc:Name>AP Server Role</cc:Name>
+      <cc:Middlewares>
+        <cc:Middleware ref="nsupdate_cookbook" />
+        <cc:Middleware ref="zabbix_cookbook" />
+        <cc:Middleware ref="deploy_cookbook" />
+        <cc:Middleware ref="application_java_cookbook" />
+      </cc:Middlewares>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_tomcat.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_tomcat.json</cc:Import>
+    </cc:Role>
+
+    <cc:Role type="chef" id="db_role">
+      <cc:Name>DB Server Role</cc:Name>
+      <cc:Middlewares>
+        <cc:Middleware ref="nsupdate_cookbook" />
+        <cc:Middleware ref="zabbix_cookbook" />
+        <cc:Middleware ref="deploy_cookbook" />
+      </cc:Middlewares>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_postgresql.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_postgresql.json</cc:Import>
+    </cc:Role>
+
+    <cc:Role type = "chef" id="zabbix_dns_role">
+      <cc:Name>Zabbix Server Role</cc:Name>
+      <cc:Middlewares>
+        <cc:Middleware ref="bind_cookbook" />
+        <cc:Middleware ref="nsupdate_cookbook" />
+        <cc:Middleware ref="zabbix_cookbook" />
+        <cc:Middleware ref="deploy_cookbook" />
+      </cc:Middlewares>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_zabbix.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_zabbix.json</cc:Import>
+    </cc:Role>
+  </cc:Roles>
+
+  <!-- ボリューム定義 -->
+  <cc:Volumes>
+    <cc:Volume id="test_vol1">
+      <cc:Size>1</cc:Size>
+      <cc:IOPS>low</cc:IOPS>
+    </cc:Volume>
+  </cc:Volumes>
+
+  <!-- マシンフィルタ -->
+  <cc:MachineFilters>
+    <cc:MachineFilter id="sec_in_22">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>22</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_udp_53">
+      <cc:Protocol>udp</cc:Protocol>
+      <cc:Port>53</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_80">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>80</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_10050">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>10050</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_10051">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>10051</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_all_deny">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>all</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>deny</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_in_22_from_private">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>22</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source ref="private_net_g1" />
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+    <cc:MachineFilter id="sec_out_all_allow">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>all</cc:Port>
+      <cc:Direction>egress</cc:Direction>
+      <cc:Destination>all</cc:Destination>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:MachineFilter>
+  </cc:MachineFilters>
+
+  <!-- ネットワーク定義 -->
+  <cc:Networks>
+    <cc:Network id="private_net1">
+      <cc:Name>private network 1</cc:Name>
+    </cc:Network>
+  </cc:Networks>
+
+  <!-- ネットワークグループ定義 -->
+  <cc:NetworkGroups>
+    <cc:NetworkGroup id="private_net_g1">
+      <cc:Name>private network group 1</cc:Name>
+      <cc:Networks>
+        <cc:Network ref="private_net1">
+          <cc:Infrastructures>
+            <cc:Infrastructure ref="cloud1" />
+          </cc:Infrastructures>
+        </cc:Network>
+      </cc:Networks>
+      <cc:NetworkFilters>
+        <cc:NetworkFilter ref="acl_in_80" />
+        <cc:NetworkFilter ref="acl_in_all_deny" />
+        <cc:NetworkFilter ref="acl_out_all_allow" />
+      </cc:NetworkFilters>
+    </cc:NetworkGroup>
+  </cc:NetworkGroups>
+
+  <!-- ネットワークフィルタ -->
+  <cc:NetworkFilters>
+    <cc:NetworkFilter id="acl_in_80">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>80</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:NetworkFilter>
+    <cc:NetworkFilter id="acl_in_all_deny">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>all</cc:Port>
+      <cc:Direction>ingress</cc:Direction>
+      <cc:Source>all</cc:Source>
+      <cc:RuleAction>deny</cc:RuleAction>
+    </cc:NetworkFilter>
+    <cc:NetworkFilter id="acl_out_all_allow">
+      <cc:Protocol>tcp</cc:Protocol>
+      <cc:Port>all</cc:Port>
+      <cc:Direction>egress</cc:Direction>
+      <cc:Destination>all</cc:Destination>
+      <cc:RuleAction>allow</cc:RuleAction>
+    </cc:NetworkFilter>
+  </cc:NetworkFilters>
+
+  <!-- Floating IP -->
+  <cc:FloatingIPs>
+    <cc:FloatingIP id="eip1">
+      <cc:Name>eip1</cc:Name>
+    </cc:FloatingIP>
+    <cc:FloatingIP id="eip2">
+      <cc:Name>eip2</cc:Name>
+    </cc:FloatingIP>
+  </cc:FloatingIPs>
+
+  <cc:Monitorings>
+    <cc:Monitoring id="linux_os">
+      <cc:Name>LinuxOS Monitoring</cc:Name>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_os.xml</cc:Import>
+    </cc:Monitoring>
+    <cc:Monitoring id="conductor_web">
+      <cc:Name>Web Monitoring</cc:Name>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_apache.xml</cc:Import>
+    </cc:Monitoring>
+    <cc:Monitoring id="conductor_ap">
+      <cc:Name>AP Monitoring</cc:Name>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_tomcat.xml</cc:Import>
+    </cc:Monitoring>
+    <cc:Monitoring id="conductor_db">
+      <cc:Name>DB Monitoring</cc:Name>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_postgresql.xml</cc:Import>
+    </cc:Monitoring>
+  </cc:Monitorings>
+</cc:System>
