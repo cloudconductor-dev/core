@@ -78,7 +78,6 @@ describe Volume do
       it 'should success to attach volume, and update state column' do
         volume.attach_volume(@machine.id)
         volume.reload
-        expect(volume.mount_point).to eq('/dev/test')
         expect(volume.state).to eq('IN-USE')
       end
     end

@@ -10,10 +10,17 @@
 # - cookbooks: opscode-community cookbooks to install target machine
 # - middlewares: middlewares to install target machine (site-cookbooks)
 
+LC_ALL=en_US.UTF-8;export LC_ALL
+
 CHEF_PACKAGE_URL=https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64
 CHEF_CLIENT_RPM=chef-11.8.0-1.el6.x86_64.rpm
 
 WORK_DIR=/tmp
+VOLUME_RETRIES=20
+<% if mountpoints %>
+MOUNTPOINTS=<%= "(\"#{mountpoints.join('" "')}\")" %>
+<% end %>
+ATTACH_DEVICE_NUM=${#MOUNTPOINTS[*]}
 RETRIES=5
 LOG_FILE=<%= ConductorConfig.cloudinit_log_file %>
 exec >> $LOG_FILE 2>&1
@@ -83,7 +90,7 @@ fi
 if [ $? -ne 0 ]; then
   for i in `seq 1 $RETRIES`
   do
-    /opt/chef/embedded/bin/gem install --no-ri --no-rdoc berkshelf && break
+    /opt/chef/embedded/bin/gem install -V --no-ri --no-rdoc -v '<3.0.0' berkshelf && break
 
     if [ $i -ge $RETRIES ]; then
       log "ERROR" "Failed to install berkshelf."
@@ -150,6 +157,44 @@ EOF
     knife cookbook site install <%= cookbook %> -c $WORK_DIR/chef-repo/config/solo.rb
   fi
 <% end %>
+
+# Attach, format and mount Volumes
+if [ $ATTACH_DEVICE_NUM -ne 0 ]; then
+  # Before attaching volumes device list
+  fdisk -l | grep 'Disk /dev' | awk '{print $2}' | sed -e s/://g > $WORK_DIR/before_devices
+
+  # ready for device attach
+  log "INFO" "Ready for attaching volumes."
+
+  # Wait for attaching volumes
+  for i in `seq 1 $VOLUME_RETRIES`
+  do
+    log "INFO" "Ready for attaching volumes."
+    fdisk -l | grep 'Disk /dev' | awk '{print $2}' | sed -e s/://g > $WORK_DIR/after_devices
+    CURRENT_DEVICES=`comm -3 /tmp/after_devices /tmp/before_devices | wc -l`
+    if [ $ATTACH_DEVICE_NUM -eq $CURRENT_DEVICES ]; then
+      break
+    fi
+    if [ $i -ge $VOLUME_RETRIES ]; then
+      log "ERROR" "Volumes was not attached."
+      exit 1
+    fi
+    sleep 30
+    log "INFO" "Wait for attaching Volumes. loop count: $i"
+  done
+
+  # Format and mount devices
+  count=0
+  for dev in `comm -3 /tmp/after_devices /tmp/before_devices`
+  do
+    mkfs -t ext4 $dev || { log "ERROR" "Failed to format ext4 device $dev."; exit 1; }
+    mkdir -p ${MOUNTPOINTS[$count]} || { log "ERROR" "Failed to make directory ${MOUNTPOINTS[$count]}."; exit 1; }
+    mount $dev ${MOUNTPOINTS[$count]} || { log "ERROR" "Failed to mount device $dev to ${MOUNTPOINTS[$count]}."; exit 1; }
+    printf "%-10s %-9s %-7s %-15s %s %s\n" $dev $MOUNTPOINTS[$count] ext4 defaults 0 2 >> /etc/fstab || { log "ERROR" "Failed to add writing /etc/fstab."; exit 1; }
+    count=`expr $count + 1`
+  done
+fi
+
 
 # Run chef-solo
 /opt/chef/bin/chef-solo -c $WORK_DIR/chef-repo/config/solo.rb -j $WORK_DIR/chef-repo/config/setup.json

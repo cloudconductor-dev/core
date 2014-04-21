@@ -170,20 +170,23 @@ describe Machine do
     context 'When machine state change to DONE and through wait_serial' do
       it 'should be nothing to do' do
         allow(machine).to receive(:state_check).and_return('DONE')
-        result = machine.send(:wait_serial)
+        template_xml = XmlParser.new(machine.machine_group.system.template_xml)
+        result = machine.send(:wait_serial, template_xml)
         expect(result).to be_nil
       end
     end
     context 'When raise unexpected execption in check state' do
       it 'should raise exception' do
         allow(machine).to receive(:state_check).and_raise(RuntimeError)
-        expect { machine.send(:wait_serial) }.to raise_error(RuntimeError)
+        template_xml = XmlParser.new(machine.machine_group.system.template_xml)
+        expect { machine.send(:wait_serial, template_xml) }.to raise_error(RuntimeError)
       end
     end
     context 'When return unexpected state in check state' do
       it 'should raise exception' do
         allow(machine).to receive(:state_check).and_return('UNKNOWN_STATE')
-        expect { machine.send(:wait_serial) }.to raise_error(RuntimeError)
+        template_xml = XmlParser.new(machine.machine_group.system.template_xml)
+        expect { machine.send(:wait_serial, template_xml) }.to raise_error(RuntimeError)
       end
     end
   end

@@ -255,8 +255,7 @@ module Action
       )
       create_interfaces(machine, template)
       associate_floating_ip(machine) unless template_machine_group[:floating_ip].nil?
-      machine.wait_serial
-      attach_volumes(machine, template) unless template_machine_group[:volumes].nil?
+      machine.wait_serial(template)
     end
   end
 
@@ -279,20 +278,6 @@ module Action
       cloud_entry_point: machine.cloud_entry_point,
     )
     floating_ip.associate(machine.id)
-  end
-
-  def attach_volumes(machine, template)
-    template_machine_group = template.list('MachineGroup').find { |grp| grp[:name] == machine.machine_group.name }
-    template_machine_group[:volumes].each do |template_volume|
-      volume = Volume.create(
-        name: template_volume[:id],
-        capacity: template_volume[:size].to_i,
-        system: machine.machine_group.system,
-        cloud_entry_point: machine.cloud_entry_point,
-        machine: machine,
-      )
-      volume.attach_volume(machine.id)
-    end
   end
 
   def create_machine_filters(system, template)

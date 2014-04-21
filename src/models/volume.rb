@@ -63,7 +63,6 @@ class Volume < ActiveRecord::Base
     response_hash = JSON.parse(response)
     update_attributes(
       machine: target_machine,
-      mount_point: response_hash['storage_volume']['device'],
       state: STATE::IN_USE
     )
   rescue

@@ -93,16 +93,17 @@ class Machine < ActiveRecord::Base
     false
   end
 
-  def wait_serial
+  def wait_serial(template)
     Log.debug(Log.format_method_start(self.class, __method__))
     Log.debug(Log.format_debug_param(attributes: attributes))
+    template_volumes = template.list('MachineGroup').find { |grp| grp[:name] == machine_group.name }[:volumes]
     loop_count = 0
     loop do
       begin
         loop_count += 1
         Log.debug(Log.format_debug_param(loop_count: loop_count))
         fail "Time out error in checking Cloudinit log.Do you have external ip in a springboard machine? And confirming Cloudinit log in machine #{name}" if loop_count >= ConductorConfig.machine.cloudinit.max_check_number
-        m_state = state_check(state)
+        m_state = state_check(state, template_volumes)
       rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::ETIMEDOUT, Net::SSH::Disconnect, Net::SSH::AuthenticationFailed, Net::SSH::Proxy::ConnectError
         sleep ConductorConfig.machine.cloudinit.check_interval
         retry
@@ -114,7 +115,7 @@ class Machine < ActiveRecord::Base
           loop_count: loop_count,
           m_state: m_state
         ))
-        fail e
+        raise
       end
       Log.debug(Log.format_debug_param(machine_state: m_state))
       if m_state == 'DONE'
@@ -204,14 +205,16 @@ class Machine < ActiveRecord::Base
 
   def build_userdata
     Log.debug(Log.format_method_start(self.class, __method__))
+    template = XmlParser.new(machine_group.system.template_xml)
     hostname = build_hostname
+    mountpoints = build_mountpoints(template)
     self.name = hostname
     userdata_template_file = ConductorConfig.cloudinit_path
     userdata_template = ERB.new(File.read(userdata_template_file), nil, '-')
     proxy = build_proxy_setting
     role = machine_group.role
     chef_attributes = JSON.parse(role.setup_parameters, symbolize_names: true) || {}
-    chef_attributes.deep_merge!(build_system_parameters(hostname))
+    chef_attributes.deep_merge!(build_system_parameters(template, hostname))
     chef_attributes.deep_merge!(JSON.parse(machine_group.user_parameters, symbolize_names: true))
     chef_attributes.deep_merge!(run_list: JSON.parse(role.setup_run_list, symbolize_names: true))
     node_json = JSON.pretty_generate(chef_attributes)
@@ -241,6 +244,13 @@ class Machine < ActiveRecord::Base
     raise
   end
 
+  def build_mountpoints(template)
+    Log.debug(Log.format_method_start(self.class, __method__))
+    template_volumes = template.list('MachineGroup').find { |grp| grp[:name] == machine_group.name }[:volumes]
+    mountpoints = template_volumes.map { |vol| vol[:mount_point] } if template_volumes
+    mountpoints
+  end
+
   def build_proxy_setting
     if admin_server?
       {
@@ -260,10 +270,9 @@ class Machine < ActiveRecord::Base
     end
   end
 
-  def build_system_parameters(hostname)
+  def build_system_parameters(template, hostname)
     Log.debug(Log.format_method_start(self.class, __method__))
     if admin_server?
-      template = XmlParser.new(machine_group.system.template_xml)
       build_server_parameters(template, hostname)
     else
       build_client_parameters(machine_group, hostname)
@@ -344,7 +353,7 @@ class Machine < ActiveRecord::Base
     end
   end
 
-  def state_check(base_state)
+  def state_check(base_state, template_volumes = nil)
     Log.debug(Log.format_method_start(self.class, __method__))
     if base_state == 'DONE' || base_state == 'STOPPING' || base_state == 'STOPPED' || base_state == 'FINISH'
       return base_state
@@ -356,9 +365,21 @@ class Machine < ActiveRecord::Base
       proxy_host = machine_group.system.gateway_server_ip
     end
     key = machine_group.system.credentials.first.private_key
+    entry_point = cloud_entry_point.entry_point
     Log.debug(Log.format_debug_param(ssh_host: host))
     Log.debug(Log.format_debug_param(ssh_proxy_host: proxy_host))
-    ssh = SSHConnection.new(host, 'root', key, nil, proxy_host)
+    params = {
+      host: host,
+      user: 'root',
+      key: key,
+      pass: nil,
+      ssh_proxy: proxy_host,
+      entry_point: entry_point,
+      c_name: cloud_entry_point.infrastructure.name
+    }
+    Log.debug(Log.format_debug_param(params: params))
+    ssh = SSHConnection.new(params)
+    Log.debug(Log.format_debug_param(ssh: ssh))
     log_file = ConductorConfig.cloudinit_log_file
     if ssh.exec!("[ -e #{log_file} ]; echo -n $?").to_i != 0
       state = 'PENDING'
@@ -367,10 +388,28 @@ class Machine < ActiveRecord::Base
     elsif ssh.exec!("tail #{log_file} | grep -c -e '\\[.*\\] INFO: Success to setup instance'").to_i == 1
       state = 'DONE'
     else
+      if template_volumes && ssh.exec!("tail -n 2 #{log_file} | grep -c -e '\\[.*\\] INFO: Ready for attaching volumes.'").to_i == 1
+        attach_volumes(template_volumes)
+      end
       state = 'RUNNING'
     end
     update_attributes(state: state)
     state
+  end
+
+  def attach_volumes(template_volumes)
+    Log.debug(Log.format_method_start(self.class, __method__))
+    template_volumes.each do |template_volume|
+      volume = Volume.create(
+        name: template_volume[:id],
+        mount_point: template_volume[:mount_point],
+        capacity: template_volume[:size].to_i,
+        system: machine_group.system,
+        cloud_entry_point: cloud_entry_point,
+        machine: self
+      )
+      volume.attach_volume(id)
+    end
   end
 
   def build_hostname
