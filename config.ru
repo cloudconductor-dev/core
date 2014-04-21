@@ -45,5 +45,7 @@ Thread.new { EventMachine::run }
 disable :show_exceptions
 
 # Run Sinatra
-root = Pathname(File.expand_path(__FILE__)).parent.basename.to_s
-map ("/#{root}") { run Sinatra::Application }
+work_dir = File.dirname(File.expand_path(__FILE__))
+root = Pathname(ENV['CONDUCTOR_ROOT'] || work_dir)
+prefix = Pathname(work_dir).relative_path_from(root.parent)
+map ("/#{prefix}") { run Sinatra::Application }
