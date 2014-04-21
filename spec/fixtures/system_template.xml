@@ -144,31 +144,31 @@ limitations under the License.
   <cc:Middlewares>
     <cc:Middleware type="chef" id="zabbix_cookbook">
       <cc:Name>CC-Zabbix</cc:Name>
-      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:Repository>https://github.com/cloudconductor/cookbooks.git</cc:Repository>
       <cc:CookbookName>cc-zabbix</cc:CookbookName>
     </cc:Middleware>
 
     <cc:Middleware type="chef" id="nsupdate_cookbook">
       <cc:Name>CC-NSUpdate</cc:Name>
-      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:Repository>https://github.com/cloudconductor/cookbooks.git</cc:Repository>
       <cc:CookbookName>cc-nsupdate</cc:CookbookName>
     </cc:Middleware>
 
     <cc:Middleware type="chef" id="bind_cookbook">
       <cc:Name>CC-Bind</cc:Name>
-      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:Repository>https://github.com/cloudconductor/cookbooks.git</cc:Repository>
       <cc:CookbookName>cc-bind</cc:CookbookName>
     </cc:Middleware>
 
     <cc:Middleware type="chef" id="deploy_cookbook">
       <cc:Name>CC-Deploy</cc:Name>
-      <cc:Repository>https://github.com/cloudconductor-dev/cookbooks.git</cc:Repository>
+      <cc:Repository>https://github.com/cloudconductor/cookbooks.git</cc:Repository>
       <cc:CookbookName>cc-deploy</cc:CookbookName>
     </cc:Middleware>
 
     <cc:Middleware type="chef" id="application_java_cookbook">
       <cc:Name>application_java</cc:Name>
-      <cc:Repository>https://github.com/cloudconductor-dev/application_java.git</cc:Repository>
+      <cc:Repository>https://github.com/cloudconductor/application_java.git</cc:Repository>
     </cc:Middleware>
   </cc:Middlewares>
 
@@ -181,8 +181,8 @@ limitations under the License.
         <cc:Middleware ref="zabbix_cookbook" />
         <cc:Middleware ref="deploy_cookbook" />
       </cc:Middlewares>
-      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_apache.json</cc:Import>
-      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_apache.json</cc:Import>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_runlist_apache.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_attr_apache.json</cc:Import>
     </cc:Role>
 
     <cc:Role type="chef" id="ap_role">
@@ -193,8 +193,8 @@ limitations under the License.
         <cc:Middleware ref="deploy_cookbook" />
         <cc:Middleware ref="application_java_cookbook" />
       </cc:Middlewares>
-      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_tomcat.json</cc:Import>
-      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_tomcat.json</cc:Import>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_runlist_tomcat.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_attr_tomcat.json</cc:Import>
     </cc:Role>
 
     <cc:Role type="chef" id="db_role">
@@ -204,8 +204,8 @@ limitations under the License.
         <cc:Middleware ref="zabbix_cookbook" />
         <cc:Middleware ref="deploy_cookbook" />
       </cc:Middlewares>
-      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_postgresql.json</cc:Import>
-      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_postgresql.json</cc:Import>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_runlist_postgresql.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_attr_postgresql.json</cc:Import>
     </cc:Role>
 
     <cc:Role type = "chef" id="zabbix_dns_role">
@@ -216,8 +216,8 @@ limitations under the License.
         <cc:Middleware ref="zabbix_cookbook" />
         <cc:Middleware ref="deploy_cookbook" />
       </cc:Middlewares>
-      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_runlist_zabbix.json</cc:Import>
-      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor-dev/chef-parameters/master/chef_attr_zabbix.json</cc:Import>
+      <cc:Import type="chef_runlist">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_runlist_zabbix.json</cc:Import>
+      <cc:Import type="chef_attribute">https://raw2.github.com/cloudconductor/chef-parameters/master/chef_attr_zabbix.json</cc:Import>
     </cc:Role>
   </cc:Roles>
 
@@ -353,19 +353,19 @@ limitations under the License.
   <cc:Monitorings>
     <cc:Monitoring id="linux_os">
       <cc:Name>LinuxOS Monitoring</cc:Name>
-      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_os.xml</cc:Import>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor/zabbix-templates/release-0.2.0/zbx_os.xml</cc:Import>
     </cc:Monitoring>
     <cc:Monitoring id="conductor_web">
       <cc:Name>Web Monitoring</cc:Name>
-      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_apache.xml</cc:Import>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor/zabbix-templates/release-0.2.0/zbx_apache.xml</cc:Import>
     </cc:Monitoring>
     <cc:Monitoring id="conductor_ap">
       <cc:Name>AP Monitoring</cc:Name>
-      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_tomcat.xml</cc:Import>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor/zabbix-templates/release-0.2.0/zbx_tomcat.xml</cc:Import>
     </cc:Monitoring>
     <cc:Monitoring id="conductor_db">
       <cc:Name>DB Monitoring</cc:Name>
-      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor-dev/zabbix-templates/release-0.2.0/zbx_postgresql.xml</cc:Import>
+      <cc:Import filetype="zabbix">https://raw.github.com/cloudconductor/zabbix-templates/release-0.2.0/zbx_postgresql.xml</cc:Import>
     </cc:Monitoring>
   </cc:Monitorings>
 </cc:System>

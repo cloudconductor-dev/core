@@ -23,7 +23,7 @@ FactoryGirl.define do
     description 'New System Description'
     state 'creating'
     response_message ''
-    template_uri 'https://raw.github.com/cloudconductor-dev/xml-store/master/template.xml'
+    template_uri 'https://raw.github.com/cloudconductor/xml-store/master/template.xml'
     template_xml File.read(File.expand_path('../fixtures/system_template.xml', File.dirname(__FILE__)))
     meta_xml '<meta_xml>...</meta_xml>'
     user_parameters '{"name": "rspec-system", "description": "this is a test system", "machine_id": {"1.apache.server.hostname": "test"}}'

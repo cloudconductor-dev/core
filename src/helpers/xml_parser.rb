@@ -106,7 +106,7 @@ class XmlParser
   # Replace keyname <Import> to preferable name
   def replace_import
     Log.debug(Log.format_method_start(self.class, __method__))
-    default_repository = 'https://raw.github.com/cloudconductor-dev/xml-store/master/'
+    default_repository = 'https://raw.github.com/cloudconductor/xml-store/master/'
     prefix = namespace.prefix
     @doc.xpath("//#{prefix}:Import").each do |import|
       if import.attributes.key?('type')
