@@ -26,7 +26,7 @@ describe ProxyauthOpenUri do
 
   before(:each) do
     # clear proxy related environments every time
-    !ENV.nil? && ENV.each do |key, value|
+    ENV && ENV.each do |key, value|
       ENV[key] = nil if key.upcase.end_with?('PROXY')
     end
   end

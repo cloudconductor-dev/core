@@ -1,39 +1,31 @@
 # This file overrides https://github.com/bbatsov/rubocop/blob/master/config/default.yml
 
-# Disable Line/Method/Class length checks.
+# Should enable. but not yet.
 LineLength:
   Enabled: false
 MethodLength:
   Enabled: false
 ClassLength:
   Enabled: false
-
-# Avoid complex methods
 CyclomaticComplexity:
   Enabled: false
-
-# Avoid Class top level comments
 Documentation:
   Enabled: false
 
-# Avoid using Class vars
-ClassVars:
-  Enabled: false
-
-# Avoid unless assinment vars
+# Disable
 UselessAssignment:
   Enabled: false
-
 SingleLineBlockParams:
   Enabled: false
-
 RegexpLiteral:
   Enabled: false
-
 RescueModifier:
   Enabled: false
-
 TrailingComma:
+  Enabled: false
+PercentLiteralDelimiters:
+  Enabled: false
+FormatString:
   Enabled: false
 
 # For old rubocop version
@@ -44,7 +36,7 @@ ReduceArguments:
 
 # Avoid check files
 AllCops:
-  Excludes:
+  Exclude:
     - db/schema.rb
     - config/**
     - misc/**

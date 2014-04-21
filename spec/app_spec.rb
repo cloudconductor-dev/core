@@ -281,8 +281,8 @@ describe 'Sinatra app.rb test' do
         expect(net['network_address']).to eq(@network.network_address)
         expect(net['prefix']).to eq(@network.prefix)
         expect(net['state']).to eq(@network.state)
-        expect(net['createDate']).to eq(@network.created_at.iso8601)
-        expect(net['updateDate']).to eq(@network.updated_at.iso8601)
+        expect(net['createDate']).to eq(@network.created_at.iso8601(3))
+        expect(net['updateDate']).to eq(@network.updated_at.iso8601(3))
       end
       after do
         @network.delete
@@ -557,8 +557,7 @@ describe 'Sinatra app.rb test' do
     end
     context 'When receive correct parameters' do
       it 'should be return response code 204' do
-        delete "/systems/#{@application.system.id}/applications/" +
-          "#{@application.id}/application_files/#{@file.id}"
+        delete "/systems/#{@application.system.id}/applications/#{@application.id}/application_files/#{@file.id}"
         expect(last_response).to be
         expect(last_response.status).to eq(204)
       end
@@ -566,8 +565,7 @@ describe 'Sinatra app.rb test' do
 
     context 'When Failed to delete application' do
       it 'should return status code 500 with invalid application_file id' do
-        delete "/systems/#{@application.system.id}/applications/" +
-          "#{@application.id}/application_files/-1"
+        delete "/systems/#{@application.system.id}/applications/#{@application.id}/application_files/-1"
         expect(last_response).to be
         expect(last_response.status).to eq(500)
         response = JSON.parse(last_response.body)
@@ -579,8 +577,7 @@ describe 'Sinatra app.rb test' do
         allow(ApplicationFile).to receive(:find_by).and_return(mock_file)
         allow(mock_file).to receive(:destroy).and_raise
 
-        delete "/systems/#{@application.system.id}/applications/" +
-          "#{@application.id}/application_files/-1"
+        delete "/systems/#{@application.system.id}/applications/#{@application.id}/application_files/-1"
         expect(last_response).to be
         expect(last_response.status).to eq(500)
         response = JSON.parse(last_response.body)
@@ -1238,8 +1235,8 @@ describe 'Sinatra app.rb test' do
         expect(filter['id']).to eq(@machine_filter_group.id)
         expect(filter['name']).to eq(@machine_filter_group.name)
         expect(filter['description']).to eq(@machine_filter_group.description)
-        expect(filter['create_date']).to eq(@machine_filter_group.created_at.iso8601)
-        expect(filter['update_date']).to eq(@machine_filter_group.updated_at.iso8601)
+        expect(filter['create_date']).to eq(@machine_filter_group.created_at.iso8601(3))
+        expect(filter['update_date']).to eq(@machine_filter_group.updated_at.iso8601(3))
         rule = filter['machine_filter_rules'].first
         expect(rule['id']).to eq(@machine_filter_group.machine_filter_rule_groups.first.id)
         expect(rule['direction']).to eq(@machine_filter_group.machine_filter_rule_groups.first.direction)
@@ -1253,9 +1250,9 @@ describe 'Sinatra app.rb test' do
         expect(rule['remote_ip_address']).to eq(@machine_filter_group
                                                 .machine_filter_rule_groups.first.remote_ip_address)
         expect(rule['create_date']).to eq(@machine_filter_group
-                                         .machine_filter_rule_groups.first.created_at.iso8601)
+                                         .machine_filter_rule_groups.first.created_at.iso8601(3))
         expect(rule['update_date']).to eq(@machine_filter_group
-                                         .machine_filter_rule_groups.first.updated_at.iso8601)
+                                         .machine_filter_rule_groups.first.updated_at.iso8601(3))
       end
       it 'should return 200 OK and machine_filter informations in no remote_address' do
         @machine_filter_group = FactoryGirl.create(:machine_filter_group_filter)
@@ -1268,8 +1265,8 @@ describe 'Sinatra app.rb test' do
         expect(filter['id']).to eq(@machine_filter_group.id)
         expect(filter['name']).to eq(@machine_filter_group.name)
         expect(filter['description']).to eq(@machine_filter_group.description)
-        expect(filter['create_date']).to eq(@machine_filter_group.created_at.iso8601)
-        expect(filter['update_date']).to eq(@machine_filter_group.updated_at.iso8601)
+        expect(filter['create_date']).to eq(@machine_filter_group.created_at.iso8601(3))
+        expect(filter['update_date']).to eq(@machine_filter_group.updated_at.iso8601(3))
         rule = filter['machine_filter_rules'].first
         expect(rule['id']).to eq(@machine_filter_group.machine_filter_rule_groups.first.id)
         expect(rule['direction']).to eq(@machine_filter_group.machine_filter_rule_groups.first.direction)
@@ -1283,9 +1280,9 @@ describe 'Sinatra app.rb test' do
           @machine_filter_group.machine_filter_rule_groups.first.remote_machine_filter_group_id)
         expect(rule['remote_ip_address']).to be_nil
         expect(rule['create_date']).to eq(@machine_filter_group
-                                         .machine_filter_rule_groups.first.created_at.iso8601)
+                                         .machine_filter_rule_groups.first.created_at.iso8601(3))
         expect(rule['update_date']).to eq(@machine_filter_group
-                                         .machine_filter_rule_groups.first.updated_at.iso8601)
+                                         .machine_filter_rule_groups.first.updated_at.iso8601(3))
       end
     end
 

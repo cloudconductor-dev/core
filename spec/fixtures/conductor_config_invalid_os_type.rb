@@ -18,16 +18,16 @@ address_block '10.0.0.0/24'
 subnet_address_block '10.0.0.0/24'
 
 # setting provisioning target os type
-# target_os_type  'centos'
-target_os_type  'ubuntu' # setting invalid target os type
+# target_os_type 'centos'
+target_os_type 'ubuntu' # setting invalid target os type
 
 # Machine create timeout
-machine.create_timeout  30
+machine.create_timeout 30
 
 # log settings
-log_dir         'log'
-log_file        'conductor.log'
-log_level       :error
+log_dir 'log'
+log_file 'conductor.log'
+log_level :error
 
 # deltacloud settings
 deltacloud_host '127.0.0.1'

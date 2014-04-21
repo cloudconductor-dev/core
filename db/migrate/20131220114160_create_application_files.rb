@@ -15,11 +15,11 @@
 class CreateApplicationFiles < ActiveRecord::Migration
   def up
     create_table :application_files do |t|
-      t.string  :name
+      t.string :name
       t.integer :machine_group_id
       t.integer :application_id
       t.integer :version
-      t.string  :path
+      t.string :path
       t.timestamps
     end
   end

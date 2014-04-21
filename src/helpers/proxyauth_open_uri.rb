@@ -21,7 +21,7 @@ class ProxyauthOpenUri
   def initialize
     Log.debug(Log.format_method_start(self.class, __method__))
     @proxyenv = {}
-    !ENV.nil? && ENV.each do |key, value|
+    ENV && ENV.each do |key, value|
       @proxyenv.store(key.upcase, value) if key.upcase.end_with?('PROXY')
     end
     Log.debug(Log.format_debug_param(proxyenv: @proxyenv))
@@ -46,15 +46,15 @@ class ProxyauthOpenUri
     Log.debug(Log.format_debug_param(use_proxy: use_proxy))
 
     if use_proxy
-      if xml_uri.scheme == 'http' && !@proxyenv['HTTP_PROXY'].nil?
+      if xml_uri.scheme == 'http' && @proxyenv['HTTP_PROXY']
         proxy_uri = URI.parse(@proxyenv['HTTP_PROXY'])
-      elsif xml_uri.scheme == 'https' && !@proxyenv['HTTPS_PROXY'].nil?
+      elsif xml_uri.scheme == 'https' && @proxyenv['HTTPS_PROXY']
         proxy_uri = URI.parse(@proxyenv['HTTPS_PROXY'])
       end
 
       unless proxy_uri.nil?
         proxy = sprintf('%s://%s:%d/', proxy_uri.scheme, proxy_uri.host, proxy_uri.port)
-        if !proxy_uri.userinfo.nil?
+        if proxy_uri.userinfo
           (username, password) = proxy_uri.userinfo.split(':')
           @options = { proxy_http_basic_authentication: [proxy, username, password] }
         else

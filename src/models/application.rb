@@ -16,7 +16,7 @@ require 'sinatra/activerecord'
 
 class Application < ActiveRecord::Base
   belongs_to :system
-  has_many   :application_files, dependent: :destroy
+  has_many :application_files, dependent: :destroy
 
   before_create proc { self.state = 'NOT YET' }
 

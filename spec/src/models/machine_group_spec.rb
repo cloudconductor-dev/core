@@ -19,10 +19,10 @@ describe MachineGroup do
     common_machine_config = FactoryGirl.build_stubbed(:small)
     system = FactoryGirl.build_stubbed(:system)
     @params = {
-       name: 'test machine group',
-       system: system,
-       common_machine_config: common_machine_config,
-       common_machine_image: common_machine_image,
+      name: 'test machine group',
+      system: system,
+      common_machine_config: common_machine_config,
+      common_machine_image: common_machine_image,
     }
   end
 

@@ -18,7 +18,7 @@ module Conductor
   module LogFormatter
     def format_exception(e)
       http_body = e.respond_to?('http_body') ? "(#{e.http_body})" : ''
-      "#{e.class.to_s}: #{e.message}#{http_body}\n#{e.backtrace.join("\n")}"
+      "#{e.class}: #{e.message}#{http_body}\n#{e.backtrace.join("\n")}"
     end
 
     def format_error_params(error_class, error_method, params)
@@ -46,7 +46,7 @@ class Log
     Log.logger.level = convert_loglevel(loglevel)
     Log.formatter = proc do |severity, datetime, progname, msg|
       thread = Thread.current || ''
-      "[#{severity[0]}, #{datetime.iso8601} #{thread}] #{severity} -- : #{msg}\n"
+      "[#{severity[0]}, #{datetime.iso8601(3)} #{thread}] #{severity} -- : #{msg}\n"
     end
     Log.debug('Start logging')
   end

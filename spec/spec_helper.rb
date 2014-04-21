@@ -24,7 +24,7 @@ SimpleCov.start
 Spork.prefork do
   $LOAD_PATH.unshift ENV['RBENV_DIR']
   ActiveRecord::Base.configurations = YAML.load_file('config/database.yml')
-  ActiveRecord::Base.establish_connection('test')
+  ActiveRecord::Base.establish_connection(:test)
   ActiveRecord::Base.default_timezone = :local
   ActiveRecord::Base.logger = Logger.new('log/test_activerecord.log')
 
@@ -52,6 +52,5 @@ Spork.prefork do
 end
 
 Spork.each_run do
-#  ActiveSupport::Dependencies.clear
   FactoryGirl.reload
 end

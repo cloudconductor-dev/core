@@ -14,7 +14,7 @@
 # limitations under the License.
 FactoryGirl.define do
   factory :machine_group, class: MachineGroup do
-    name 'Web Server'
+    name 'Apache Web Server'
     min_size 1
     max_size 1
     node_type 'single'
