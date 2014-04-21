@@ -25,6 +25,7 @@ module Action
     Log.debug(Log.format_debug_param(db_file: db_file))
     passwd = application_database_password
     @application.system.machine_groups.each do |machine_group|
+      Log.debug(Log.format_debug_param(machine_group_role_deploy_parameters: machine_group.role.deploy_parameters))
       deploy_json = deploy_attributes(passwd).deep_merge(
         JSON.parse(machine_group.role.deploy_parameters, symbolize_names: true)
       )
@@ -37,10 +38,24 @@ module Action
           Log.debug(Log.format_debug_param(use_crednetial_name: credential.name))
           gateway_server_ip = @application.system.gateway_server_ip
           Log.debug(Log.format_debug_param(ssh_gateway_server_ip: gateway_server_ip))
-          ssh = SSHConnection.new(hostname, 'root', credential.private_key, nil, gateway_server_ip)
+          entry_point = machine.cloud_entry_point.entry_point
+          params = {
+            host: hostname,
+            user: 'root',
+            key: credential.private_key,
+            pass: nil,
+            ssh_proxy: gateway_server_ip,
+            entry_point: entry_point,
+            c_name: machine.cloud_entry_point.infrastructure.name
+          }
+          ssh = SSHConnection.new(params)
+          Log.debug(' ----- Start SCP command !! ----- ')
+          Log.debug(Log.format_debug_param(machine_group_role_type: machine_group.role.type))
           ssh.scp(ap_file.path, "/tmp/#{@application.name}-#{ap_file.name}") if ap_file && machine_group.role.type == 'ap'
           ssh.scp(db_file.path, "/tmp/#{@application.name}-#{db_file.name}") if db_file && machine_group.role.type == 'db'
-          ssh.run_chef_solo(JSON.generate(deploy_json))
+          c_list = JSON.generate(deploy_json)
+          Log.debug(Log.format_debug_param(c_list: c_list))
+          ssh.run_chef_solo(c_list)
         rescue
           if credential
             error_credential = credential.attributes
