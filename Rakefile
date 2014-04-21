@@ -4,12 +4,13 @@ $LOAD_PATH.unshift ENV['RBENV_DIR'] if ENV['RBENV_DIR']
 require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 
-environment = ENV['RAILS_ENV'] || 'development'
+environment = ENV['RAILS_ENV'] || :development
 
 namespace :db do
   task :connect do
     require 'bundler/setup'
     Bundler.require
+    ActiveRecord::Tasks::DatabaseTasks.db_dir = 'db'
     ActiveRecord::Base.configurations = YAML.load_file('config/database.yml')
     ActiveRecord::Base.establish_connection(environment)
     autoload_paths = ['src/models', 'src/controllers', 'src/helpers']
