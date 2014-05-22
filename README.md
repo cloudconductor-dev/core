@@ -35,26 +35,34 @@ Prerequisites
 Quick Start
 ===========
 
-- Clone github repository
+### Clone github repository
 
-    git clone https://github.com/cloudconductor/core.git
+```bash
+git clone https://github.com/cloudconductor/core.git
+```
 
-- Install dependencies and initialize database
+### Install dependencies and initialize database
 
-    cd conductor
-    script/deltacloud install
-    bundle install
-    bundle exec rake init
+```bash
+cd conductor
+script/deltacloud install
+bundle install
+bundle exec rake init
+```
 
-- Run server
+### Run server
 
-    script/deltacloud start
-    bundle exec rake server:start
+```bash
+script/deltacloud start
+bundle exec rake server:start
+```
 
-- Stop server
+### Stop server
 
-    bundle exec rake server:stop
-    script/deltacloud stop
+```bash
+bundle exec rake server:stop
+script/deltacloud stop
+```
 
 
 Copyright and License
